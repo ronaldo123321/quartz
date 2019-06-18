@@ -1,0 +1,21 @@
+quartz:
+  enabled: true
+server:
+  port: 9090
+
+spring:
+  application:
+    name: Spring-Quartz-Scheduler
+  datasource:
+    url: jdbc:mysql://192.168.7.209:3306/quartztest?useUnicode=true&useSSL=false&characterEncoding=utf8
+    username: root
+    password: 123456
+    tomcat:
+      initial-size: 20
+      max-active: 100
+      max-idle: 100
+      min-idle: 20
+      max-wait: 10000
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
