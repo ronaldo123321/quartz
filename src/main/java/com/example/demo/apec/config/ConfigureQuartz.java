@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- * @author bogao
+ * @author ronaldo
  * @version 2.0
  * @date 2019/6/18 19:15
  * Quartz核心配置类

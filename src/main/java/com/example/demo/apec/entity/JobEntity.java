@@ -7,7 +7,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 /**
- * @author bogao
+ * @author ronaldo
  * @version 2.0
  * @date 2019/6/18 19:09
  */

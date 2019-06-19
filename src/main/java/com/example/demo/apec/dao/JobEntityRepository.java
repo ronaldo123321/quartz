@@ -5,7 +5,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * @author bogao
+ * @author ronaldo
  * @version 2.0
  * @date 2019/6/18 19:30
  */
