@@ -21,7 +21,7 @@ public class BaseJob implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 
-        log.info("当前执行任务时间："+simpleDateFormat.format(new Date()+":"));
+        log.info("当前执行任务时间："+simpleDateFormat.format(new Date()));
         log.info(jobExecutionContext.getTrigger().getKey().getGroup());
         log.info(jobExecutionContext.getTrigger().getKey().getName());
 
