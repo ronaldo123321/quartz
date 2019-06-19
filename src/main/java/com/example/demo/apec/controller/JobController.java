@@ -1,4 +1,4 @@
-package com.example.demo.controller;
+package com.example.demo.apec.controller;
 
 import com.example.demo.apec.dao.JobEntityRepository;
 import com.example.demo.apec.entity.JobEntity;
@@ -9,8 +9,10 @@ import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
@@ -91,6 +93,48 @@ public class JobController {
 
     }
 
+    /**
+     * 修改某个job执行的cron
+     * @param modifyCronDTO
+     * @return
+     */
+    @PostMapping("/modifyJob")
+    public String modifyJob(@RequestBody @Validated ModifyCronDTO modifyCronDTO) throws SchedulerException {
+
+        if(!CronExpression.isValidExpression(modifyCronDTO.getCron())){
+            return "cron is valid!";
+        }
+
+        synchronized(log){
+            JobEntity entity = jobService.getJobEntityById(modifyCronDTO.getId());
+            if("OPEN".equals(entity.getStatus())){
+                JobKey jobKey = jobService.getJobKey(entity);
+                TriggerKey triggerKey = new TriggerKey(jobKey.getName(), jobKey.getGroup());
+                Scheduler scheduler = schedulerFactoryBean.getScheduler();
+                CronTrigger cronTrigger = (CronTrigger) scheduler.getTrigger(triggerKey);
+                String oldCron = cronTrigger.getCronExpression();
+                if(!oldCron.equalsIgnoreCase(modifyCronDTO.getCron())){
+                    entity.setCron(modifyCronDTO.getCron());
+                    CronScheduleBuilder scheduleBuilder =  CronScheduleBuilder.cronSchedule(modifyCronDTO.getCron());
+                    CronTrigger trigger = TriggerBuilder.newTrigger()
+                            .withIdentity(jobKey.getName(), jobKey.getGroup())
+                            .withSchedule(scheduleBuilder)
+                            .usingJobData(jobService.getJobDataMap(entity))
+                            .build();
+                    scheduler.rescheduleJob(triggerKey,trigger);
+                    repository.save(entity);
+                }
+
+            } else {
+                 log.info("Job jump is{},because {} status is {}",entity.getName(),entity.getName(),entity.getStatus());
+                 return "job modify fail, because the job is closed.";
+            }
+        }
+
+        return "modify success";
+
+    }
+
 
     /**
      * 重新启动所有的job
@@ -100,7 +144,7 @@ public class JobController {
         synchronized (log){
             Scheduler scheduler = schedulerFactoryBean.getScheduler();
             Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.anyGroup());
-            scheduler.pauseJobs(GroupMatcher.anyGroup());//暂停所有的Job
+             scheduler.pauseJobs(GroupMatcher.anyGroup());//暂停所有的Job
             //删除数据库中所有注册的job 然后重启拉起
             for (JobKey jobKey: jobKeys) {
                 scheduler.unscheduleJob(TriggerKey.triggerKey(jobKey.getName(),jobKey.getGroup()));
