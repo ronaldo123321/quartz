@@ -2,6 +2,7 @@ package com.example.demo.apec.controller;
 
 import com.example.demo.apec.dao.JobEntityRepository;
 import com.example.demo.apec.entity.JobEntity;
+import com.example.demo.apec.entity.User;
 import com.example.demo.apec.service.DynamicJobService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+
 import javax.annotation.PostConstruct;
+import java.util.Date;
 import java.util.Objects;
 import java.util.Set;
 
@@ -36,19 +39,24 @@ public class JobController {
     
     @Autowired
     private JobEntityRepository repository;
-    
-    
+
     //初始化并重启所有的job
     @PostConstruct
     public void initialize(){
         try {
+            User user = new User();
+            user.setNickName("昵称");
+            user.setBirthday(new Date());
+            JobEntity jobEntity = new JobEntity();
+            jobEntity.setName("hahaha");
+            jobEntity.setJarPath("/abc/ddd");
+            log.info("测试job实体：{}, user={}",jobEntity,user);
             reStartAllJobs();
         } catch (SchedulerException e) {
             e.printStackTrace();
         }
         log.info("INIT SUCCESS");
     }
-
 
 
     @PostMapping("/refresh/{id}")
